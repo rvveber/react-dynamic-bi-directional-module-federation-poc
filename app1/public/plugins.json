@@ -1,0 +1,124 @@
+{
+  "plugins": [
+    {
+      "id": "app2-widget",
+      "name": "App 2 Widget",
+      "description": "Widget from App 2 with Moment.js integration",
+      "entry": "http://localhost:3002/remoteEntry.js",
+      "module": "Widget",
+      "scope": "app2",
+      "behavior": "manual",
+      "category": "widget"
+    },
+    {
+      "id": "app2-widget-host-integration",
+      "name": "App 2 Widget with Host Integration",
+      "description": "Plugin that imports components from the host application",
+      "entry": "http://localhost:3002/remoteEntry.js",
+      "module": "WidgetWithHostIntegration",
+      "scope": "app2",
+      "behavior": "manual",
+      "category": "widget"
+    },
+    {
+      "id": "app3-widget",
+      "name": "App 3 Widget", 
+      "description": "Widget from App 3 with React hooks and Moment.js",
+      "entry": "http://localhost:3003/remoteEntry.js",
+      "module": "Widget",
+      "scope": "app3",
+      "behavior": "manual",
+      "category": "widget"
+    },
+    {
+      "id": "app3-widget-host-integration",
+      "name": "App 3 Widget with Host Integration",
+      "description": "Plugin 3 that demonstrates bidirectional component sharing",
+      "entry": "http://localhost:3003/remoteEntry.js",
+      "module": "WidgetWithHostIntegration",
+      "scope": "app3",
+      "behavior": "manual",
+      "category": "widget"
+    },
+    {
+      "id": "app4-widget",
+      "name": "App 4 Widget",
+      "description": "Interactive widget with real-time clock",
+      "entry": "http://localhost:3004/remoteEntry.js",
+      "module": "Widget",
+      "scope": "app4",
+      "behavior": "manual",
+      "category": "widget"
+    },
+    {
+      "id": "app4-dashboard",
+      "name": "App 4 Dashboard",
+      "description": "Task management dashboard component",
+      "entry": "http://localhost:3004/remoteEntry.js",
+      "module": "Dashboard",
+      "scope": "app4",
+      "behavior": "manual",
+      "category": "dashboard"
+    },
+    {
+      "id": "app4-header-clock",
+      "name": "Header Clock Widget",
+      "description": "Live clock widget for header",
+      "entry": "http://localhost:3004/remoteEntry.js",
+      "module": "SidebarWidget",
+      "scope": "app4",
+      "injection": {
+        "selector": "header h1",
+        "position": "after"
+      }
+    },
+    {
+      "id": "app4-sidebar-clock-start",
+      "name": "Sidebar Clock (Start)",
+      "description": "Live clock widget at the start of sidebar",
+      "entry": "http://localhost:3004/remoteEntry.js",
+      "module": "SidebarWidget",
+      "scope": "app4",
+      "injection": {
+        "selector": "aside h4",
+        "position": "after"
+      }
+    },
+    {
+      "id": "app4-sidebar-clock-middle",
+      "name": "Sidebar Clock (Middle)",
+      "description": "Live clock widget between colored rectangles",
+      "entry": "http://localhost:3004/remoteEntry.js",
+      "module": "SidebarWidget",
+      "scope": "app4",
+      "injection": {
+        "selector": "aside div[style*='ffeaa7']",
+        "position": "after"
+      }
+    },
+    {
+      "id": "app4-sidebar-clock-end",
+      "name": "Sidebar Clock (End)",
+      "description": "Live clock widget at the end of sidebar",
+      "entry": "http://localhost:3004/remoteEntry.js",
+      "module": "SidebarWidget",
+      "scope": "app4",
+      "injection": {
+        "selector": "aside div[style*='fab1a0']",
+        "position": "after"
+      }
+    },
+    {
+      "id": "app4-advanced-sidebar-test",
+      "name": "Advanced Sidebar Widget with Host Integration",
+      "description": "Advanced widget demonstrating bidirectional component integration",
+      "entry": "http://localhost:3004/remoteEntry.js",
+      "module": "AdvancedSidebarWidget",
+      "scope": "app4",
+      "injection": {
+        "selector": "aside h4",
+        "position": "before"
+      }
+    }
+  ]
+}
