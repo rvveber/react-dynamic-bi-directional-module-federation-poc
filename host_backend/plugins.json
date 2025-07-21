@@ -1,0 +1,64 @@
+{
+  "plugins": [
+    {
+      "id": "before-first-card",
+      "name": "Before First Card Plugin", 
+      "description": "Plugin that injects before the first card",
+      "remote_url": "http://localhost:3002/remoteEntry.js",
+      "module_name": "Widget",
+      "scope_name": "plugin_frontend",
+      "injection_config": {
+        "target_selector": "#first-card",
+        "injection_position": "before"
+      }
+    },
+    {
+      "id": "replace-middle-card",
+      "name": "Replace Middle Card Plugin",
+      "description": "Plugin that replaces the middle card",
+      "remote_url": "http://localhost:3002/remoteEntry.js",
+      "module_name": "Widget", 
+      "scope_name": "plugin_frontend",
+      "injection_config": {
+        "target_selector": "#middle-card",
+        "injection_position": "replace"
+      }
+    },
+    {
+      "id": "after-last-card",
+      "name": "After Last Card Plugin",
+      "description": "Plugin that injects after the last card",
+      "remote_url": "http://localhost:3002/remoteEntry.js",
+      "module_name": "Widget",
+      "scope_name": "plugin_frontend",
+      "injection_config": {
+        "target_selector": "#last-card",
+        "injection_position": "after"
+      }
+    },
+    {
+      "id": "auth-aware-widget",
+      "name": "Auth-Aware Plugin",
+      "description": "Plugin that demonstrates reactive auth state sharing",
+      "remote_url": "http://localhost:3002/remoteEntry.js",
+      "module_name": "AuthAwareWidget",
+      "scope_name": "plugin_frontend",
+      "injection_config": {
+        "target_selector": "main",
+        "injection_position": "prepend"
+      }
+    },
+    {
+      "id": "bidirectional-main",
+      "name": "Bidirectional Main Plugin",
+      "description": "Bidirectional plugin that appends to main content",
+      "remote_url": "http://localhost:3002/remoteEntry.js",
+      "module_name": "HostConsumerWidget", 
+      "scope_name": "plugin_frontend",
+      "injection_config": {
+        "target_selector": "main",
+        "injection_position": "append"
+      }
+    }
+  ]
+}
