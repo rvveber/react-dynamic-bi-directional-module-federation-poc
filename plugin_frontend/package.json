@@ -1,22 +1,31 @@
 {
   "name": "plugin_frontend",
   "version": "1.0.0",
-  "description": "Minimal plugin frontend demonstrating bidirectional module federation",
+  "description": "Plugin frontend with webpack module federation for SSG compatibility",
   "scripts": {
-    "start": "webpack serve --mode development",
-    "build": "webpack --mode production"
+    "build": "webpack --config webpack.config.js --mode production",
+    "dev": "webpack serve --config webpack.config.js --mode development --port 3002",
+    "serve": "serve dist -l 3002"
   },
   "dependencies": {
     "react": "^19.1.0",
     "react-dom": "^19.1.0"
   },
   "devDependencies": {
-    "@babel/preset-react": "^7.24.0",
-    "@module-federation/enhanced": "^0.0.11",
-    "babel-loader": "^9.0.0",
-    "html-webpack-plugin": "^5.6.0",
-    "webpack": "^5.90.0",
+    "@babel/core": "^7.22.0",
+    "@babel/preset-react": "^7.22.0",
+    "@babel/preset-typescript": "^7.22.0",
+    "@module-federation/enhanced": "^0.6.0",
+    "@types/react": "^18.0.0",
+    "@types/react-dom": "^18.0.0",
+    "babel-loader": "^9.1.0",
+    "css-loader": "^6.8.0",
+    "html-webpack-plugin": "^5.5.0",
+    "serve": "^14.0.0",
+    "style-loader": "^3.3.0",
+    "typescript": "^5.0.0",
+    "webpack": "^5.100.2",
     "webpack-cli": "^5.1.0",
-    "webpack-dev-server": "^5.0.0"
+    "webpack-dev-server": "^4.15.0"
   }
 }

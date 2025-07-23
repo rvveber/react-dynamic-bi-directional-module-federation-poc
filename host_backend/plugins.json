@@ -37,11 +37,23 @@
       }
     },
     {
-      "id": "auth-aware-widget",
-      "name": "Auth-Aware Plugin",
-      "description": "Plugin that demonstrates reactive auth state sharing",
+      "id": "bidirectional-main",
+      "name": "Bidirectional Main Plugin",
+      "description": "Bidirectional plugin that appends to main content",
       "remote_url": "http://localhost:3002/remoteEntry.js",
-      "module_name": "AuthAwareWidget",
+      "module_name": "HostCardWidget", 
+      "scope_name": "plugin_frontend",
+      "injection_config": {
+        "target_selector": "main",
+        "injection_position": "append"
+      }
+    },
+    {
+      "id": "counter-widget",
+      "name": "Host Counter Widget",
+      "description": "A widget that interacts with a shared counter state from the host.",
+      "remote_url": "http://localhost:3002/remoteEntry.js",
+      "module_name": "HostCounterWidget",
       "scope_name": "plugin_frontend",
       "injection_config": {
         "target_selector": "main",
@@ -49,15 +61,15 @@
       }
     },
     {
-      "id": "bidirectional-main",
-      "name": "Bidirectional Main Plugin",
-      "description": "Bidirectional plugin that appends to main content",
+      "id": "auth-widget",
+      "name": "Host Auth Widget",
+      "description": "A widget that displays the current authentication state from the host.",
       "remote_url": "http://localhost:3002/remoteEntry.js",
-      "module_name": "HostConsumerWidget", 
+      "module_name": "HostAuthWidget",
       "scope_name": "plugin_frontend",
       "injection_config": {
         "target_selector": "main",
-        "injection_position": "append"
+        "injection_position": "prepend"
       }
     }
   ]

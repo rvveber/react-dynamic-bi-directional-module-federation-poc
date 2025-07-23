@@ -1,14 +1,15 @@
 #!/usr/bin/env bash
 
-# Demo script for Dynamic Bidirectional Module Federation POC
-# Safely kills previous processes and starts all services
+# Demo script for SSG + Module Federation POC
+# Host: Next.js SSG with manual remoteEntry.js copy
+# Plugin: Standard webpack with proper remoteEntry.js
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PID_FILE="$SCRIPT_DIR/demo.pid"
 
 # Function to cleanup and kill processes
 cleanup() {
-    echo "🛑 Stopping all services..."
+    echo "🛑 Stopping all SSG + Module Federation services..."
     
     # Kill processes from PID file if it exists
     if [ -f "$PID_FILE" ]; then
@@ -21,9 +22,9 @@ cleanup() {
         rm -f "$PID_FILE"
     fi
     
-    # Also kill any webpack/node processes on our ports
-    pkill -f "webpack.*serve.*3001" 2>/dev/null || true
-    pkill -f "webpack.*serve.*3002" 2>/dev/null || true
+    # Also kill any serve processes on our ports
+    pkill -f "serve.*3001" 2>/dev/null || true
+    pkill -f "serve.*3002" 2>/dev/null || true
     pkill -f "node.*server.js" 2>/dev/null || true
     
     # Wait a moment for processes to stop
@@ -38,66 +39,87 @@ trap cleanup EXIT INT TERM
 # Cleanup any existing processes
 cleanup
 
-echo "🚀 Starting Dynamic Bidirectional Module Federation Demo..."
-echo "===========================================" 
+echo "🚀 Starting SSG + Module Federation Demo..."
+echo "================================================================"
 
-# Start host_backend (serves plugin configuration)
-echo "Starting host_backend on port 3000..."
+# Build and serve host_frontend (Next.js SSG with manual remoteEntry.js copy)
+echo "🏗️ Building host SSG application..."
+cd "$SCRIPT_DIR/host_frontend"
+if [ ! -d "node_modules" ]; then
+    echo "Installing host_frontend dependencies..."
+    bun install
+fi
+
+echo "Building static host with federation..."
+bun run build
+if [ $? -ne 0 ]; then
+    echo "❌ Host build failed"
+    exit 1
+fi
+
+echo "Starting host SSG server on port 3001..."
+./node_modules/.bin/serve out -l 3001 &
+HOST_PID=$!
+echo $HOST_PID >> "$PID_FILE"
+echo "✅ host_frontend started (PID: $HOST_PID)"
+
+# Build and serve plugin_frontend (standard webpack)
+echo "🔌 Building plugin webpack application..."
+cd "$SCRIPT_DIR/plugin_frontend"
+if [ ! -d "node_modules" ]; then
+    echo "Installing plugin_frontend dependencies..."
+    bun install
+fi
+
+echo "Building webpack plugin with proper remoteEntry.js..."
+bun run build
+if [ $? -ne 0 ]; then
+    echo "❌ Plugin build failed"
+    exit 1
+fi
+
+echo "Starting plugin server on port 3002 (remoteEntry.js only)..."
+./node_modules/.bin/serve dist -l 3002 &
+PLUGIN_PID=$!
+echo $PLUGIN_PID >> "$PID_FILE"
+echo "✅ plugin_frontend started (PID: $PLUGIN_PID)"
+
+# Start host_backend (still needed for plugin configuration)
+echo "🔧 Starting configuration backend..."
 cd "$SCRIPT_DIR/host_backend"
 if [ ! -d "node_modules" ]; then
     echo "Installing host_backend dependencies..."
-    npm install
+    bun install
 fi
 node server.js &
 BACKEND_PID=$!
 echo $BACKEND_PID >> "$PID_FILE"
 echo "✅ host_backend started (PID: $BACKEND_PID)"
 
-# Start host_frontend 
-echo "Starting host_frontend on port 3001..."
-cd "$SCRIPT_DIR/host_frontend"
-if [ ! -d "node_modules" ]; then
-    echo "Installing host_frontend dependencies..."
-    npm install
-fi
-npm start &
-FRONTEND_PID=$!
-echo $FRONTEND_PID >> "$PID_FILE"
-echo "✅ host_frontend started (PID: $FRONTEND_PID)"
-
-# Start plugin_frontend
-echo "Starting plugin_frontend on port 3002..."
-cd "$SCRIPT_DIR/plugin_frontend"
-if [ ! -d "node_modules" ]; then
-    echo "Installing plugin_frontend dependencies..."
-    npm install
-fi
-npm start &
-PLUGIN_PID=$!
-echo $PLUGIN_PID >> "$PID_FILE"
-echo "✅ plugin_frontend started (PID: $PLUGIN_PID)"
-
 echo ""
-echo "🎉 All services started successfully!"
-echo "==========================================="
+echo "🎉 All SSG + Module Federation services started successfully!"
+echo "=================================================="
 echo ""
 echo "📋 Services:"
-echo "  🔧 Backend:     http://localhost:3000"
-echo "  🏠 Host:        http://localhost:3001"
-echo "  🔌 Plugin:      http://localhost:3002"
+echo "  🔧 Backend:       http://localhost:3000 (plugins.json)"
+echo "  🏠 Host:          http://localhost:3001 (Next.js with module federation)"
+echo "  🔌 Plugin:        http://localhost:3002 (webpack remoteEntry.js)"
 echo ""
-echo "🧪 Demo Instructions:"
-echo "  1. Open http://localhost:3001 (Host application)"
-echo "  2. Notice plugins automatically injected around the page"
-echo "  3. Check sidebar for replaced content"
-echo "  4. See bidirectional federation with host components"
-echo "  5. Check http://localhost:3002 to see plugin running standalone"
+echo "🧪 Module Federation Demo Instructions:"
+echo "  1. Open http://localhost:3001 (Host Application)"
+echo "  2. Wait for countdown - plugins auto-inject from webpack build"
+echo "  3. See bidirectional federation between host ↔ plugin"
 echo ""
-echo "⚡ Features demonstrated:"
-echo "  ✅ Dynamic plugin loading from JSON config"
-echo "  ✅ Automatic plugin injection (before/after/replace)"
-echo "  ✅ Bidirectional module federation (plugins use host components)"
-echo "  ✅ Hot reloading for development"
+echo "⚡ Module Federation Features demonstrated:"
+echo "  ✅ Host: Next.js SSG static build with module federation"
+echo "  ✅ Plugin: Webpack build exposing components to host"
+echo "  ✅ Runtime Module Federation from static ↔ webpack builds"
+echo "  ✅ Dynamic plugin loading from webpack federation"
+echo "  ✅ Bidirectional component sharing (host ↔ plugin)"
+echo ""
+echo "🏗️ Build artifacts:"
+echo "  📁 host_frontend/out/       - Static host files + copied remoteEntry.js"
+echo "  📁 plugin_frontend/dist/    - Webpack plugin files + native remoteEntry.js"
 echo ""
 echo "🛑 Press Ctrl+C to stop all services"
 echo ""

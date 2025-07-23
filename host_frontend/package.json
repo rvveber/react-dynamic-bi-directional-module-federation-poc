@@ -1,23 +1,27 @@
 {
   "name": "host_frontend",
   "version": "1.0.0",
-  "description": "Minimal host frontend for dynamic bidirectional module federation demo",
+  "description": "Host frontend with Next.js SSG and dynamic module federation",
   "scripts": {
-    "start": "webpack serve --mode development",
-    "build": "webpack --mode production"
+    "dev": "NEXT_PRIVATE_LOCAL_WEBPACK=true next dev -p 3001",
+    "build": "NEXT_PRIVATE_LOCAL_WEBPACK=true next build && cp .next/remoteEntry.js out/remoteEntry.js",
+    "start": "next start -p 3001",
+    "serve": "serve out -l 3001"
   },
   "dependencies": {
+    "@module-federation/runtime": "^0.0.11",
+    "next": "^14.0.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
-    "@module-federation/runtime": "^0.0.11"
+    "webpack": "^5.100.2"
   },
   "devDependencies": {
-    "@babel/preset-react": "^7.24.0",
-    "@module-federation/enhanced": "^0.0.11",
-    "babel-loader": "^9.0.0",
-    "html-webpack-plugin": "^5.6.0",
-    "webpack": "^5.90.0",
-    "webpack-cli": "^5.1.0",
-    "webpack-dev-server": "^5.0.0"
+    "@module-federation/nextjs-mf": "^8.0.0",
+    "@types/node": "^20.0.0",
+    "@types/react": "^18.0.0",
+    "@types/react-dom": "^18.0.0",
+    "copy-webpack-plugin": "^13.0.0",
+    "serve": "^14.0.0",
+    "typescript": "^5.0.0"
   }
 }
