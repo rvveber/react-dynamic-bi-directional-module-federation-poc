@@ -1,6 +1,7 @@
 import React from 'react';
 import { useRemoteModule } from '../hooks/useRemoteModule';
-import { PluginWidgetWrapper, LoadingState, ErrorState } from './SharedComponents';
+import { PluginWidgetWrapper } from './common';
+import { LoadingState, ErrorState } from 'host_frontend/common';
 import '../styles/components.css';
 
 const HostCardWidget: React.FC = () => {
@@ -19,12 +20,12 @@ const HostCardWidget: React.FC = () => {
 
   return (
     <PluginWidgetWrapper
-      title="Plugin Widget"
+      title="HostCardWidget (from Plugin)"
       description="Bidirectional module federation demo"
     >
       <div style={{ marginTop: '12px' }}>
-        <HostCard title="Plugin Using Host Component">
-          <span style={{ color: '#ff9800' }}>This card is defined in host but rendered by plugin</span>
+        <HostCard title="Card 4">
+          <span>This card is defined in host but rendered by plugin</span>
         </HostCard>
       </div>
     </PluginWidgetWrapper>

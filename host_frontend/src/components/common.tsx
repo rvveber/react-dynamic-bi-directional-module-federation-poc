@@ -1,6 +1,8 @@
 import React from 'react';
 
-// Standardized loading component for host
+/**
+ * Standardized loading state component
+ */
 export const LoadingState: React.FC<{ message?: string }> = ({ 
   message = "Loading..." 
 }) => (
@@ -9,7 +11,9 @@ export const LoadingState: React.FC<{ message?: string }> = ({
   </div>
 );
 
-// Standardized error component for host
+/**
+ * Standardized error state component
+ */
 export const ErrorState: React.FC<{ message?: string }> = ({ 
   message = "Something went wrong" 
 }) => (

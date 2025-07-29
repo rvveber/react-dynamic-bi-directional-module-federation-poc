@@ -8,6 +8,7 @@
     "serve": "serve dist -l 3002"
   },
   "dependencies": {
+    "@tanstack/react-query": "^5.83.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0"
   },

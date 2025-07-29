@@ -1,15 +1,13 @@
 import React from "react";
 import { useCounter } from "../contexts/CounterContext";
-import { useAuth } from "../contexts/AuthContext";
+import { useAuth, useAuthQuery } from "../contexts/AuthContext";
 
 const Header: React.FC = () => {
   const { count } = useCounter();
-  const { isAuthenticated, login, logout } = useAuth();
+  const { login, logout } = useAuth();
+  const { data, isLoading } = useAuthQuery(); 
 
-  const handleLogin = async () => {
-    // Simple fake login without form
-    await login("test@admin.com", "password");
-  };
+  const isAuthenticated = data?.authenticated || false;
 
   return (
     <header className="app-header">
@@ -28,12 +26,20 @@ const Header: React.FC = () => {
 
         {/* Auth Section - Simple login/logout */}
         {isAuthenticated ? (
-          <div className="status-badge status-badge-success" onClick={logout} style={{ cursor: 'pointer' }}>
-            Logout
+          <div 
+            className={`status-badge ${isLoading ? 'status-badge-warning' : 'status-badge-success'}`}
+            onClick={isLoading ? undefined : logout} 
+            style={{ cursor: isLoading ? 'default' : 'pointer' }}
+          >
+            {isLoading ? 'Loading...' : 'Logout'}
           </div>
         ) : (
-          <div className="status-badge status-badge-info" onClick={handleLogin} style={{ cursor: 'pointer' }}>
-            Login
+          <div 
+            className={`status-badge ${isLoading ? 'status-badge-warning' : 'status-badge-info'}`}
+            onClick={isLoading ? undefined : login} 
+            style={{ cursor: isLoading ? 'default' : 'pointer' }}
+          >
+            {isLoading ? 'Loading...' : 'Login'}
           </div>
         )}
       </div>

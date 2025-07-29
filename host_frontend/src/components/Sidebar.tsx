@@ -7,15 +7,15 @@ const Sidebar: React.FC = () => {
       <h3 className="sidebar-title">Plugin Targets</h3>
       
       <Card id="first-card" title="Card 1">
-        Plugin will inject BEFORE this
+        Plugin will inject widget BEFORE this
       </Card>
       
       <Card id="middle-card" title="Card 2">
-        Plugin will REPLACE this
+        Plugin will REPLACE this with widget.
       </Card>
       
       <Card id="last-card" title="Card 3">
-        Plugin will inject AFTER this
+        Plugin will inject widget AFTER this
       </Card>
     </aside>
   );

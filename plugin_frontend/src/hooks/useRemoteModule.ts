@@ -6,6 +6,9 @@ interface RemoteModuleHookOptions {
   component: string;
 }
 
+/**
+ * Hook for loading remote module federation components
+ */
 export const useRemoteModule = (options: RemoteModuleHookOptions) => {
   const [remoteModule, setRemoteModule] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);

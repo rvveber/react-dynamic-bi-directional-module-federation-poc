@@ -1,194 +1,264 @@
-# Dynamic Bidirectional Module Federation POC
+# React Dynamic Runtime Module Federation POC
 
-A production-ready demonstration of dynamic bidirectional module federation using Next.js SSG, Webpack 5, and TypeScript.
+This proof-of-concept demonstrates a powerful, dynamic, and bi-directional plugin architecture using Module Federation with React and Next.js. It serves as a template for building highly extensible applications where the host and plugins can share components, state, and logic at runtime, without requiring a rebuild of the host application.
 
-## Overview
+## Core Concepts
 
-This proof-of-concept demonstrates runtime module federation where:
+- **Dynamic Loading**: Plugins are loaded at runtime based on a JSON configuration. The host application has no knowledge of the plugins at build time.
+- **Bi-Directional Sharing**:
+    - **Host to Plugin**: The host exposes components (`Card`), state management contexts (`CounterContext`), and even its core data layer (`queryClient`) for plugins to use.
+    - **Plugin to Host**: Plugins are injected into the host's DOM at specified locations.
+- **Shared React Instance**: By configuring React as a `singleton`, both the host and the plugins use the same instance of the React library, enabling seamless integration of state and context.
 
-- **Host applications** dynamically load plugins from JSON configuration
-- **Plugins** bidirectionally import and use host components at runtime
-- **Zero manual registration** - plugins auto-inject with configurable DOM positioning
-- **SSG compatibility** - Static Site Generation with runtime Module Federation
-- **Production-ready** - TypeScript, shared components, professional styling
+## How to Run the Demo
 
-## Architecture
+1.  **Prerequisites**: Ensure you have Node.js (v18+) and npm installed.
+2.  **Start the Application**:
+    ```bash
+    ./demo.sh
+    ```
+    This script handles everything: it installs dependencies, builds both the host and plugin applications, and starts all the necessary services.
 
-### Core Components
+3.  **Open the Host**: Navigate to `http://localhost:3001` in your browser.
 
-```
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   Host Backend  │    │  Host Frontend  │    │ Plugin Frontend │
-│   (Express.js)  │◄──►│  (Next.js SSG)  │◄──►│   (Webpack 5)   │
-│   Port 3000     │    │   Port 3001     │    │   Port 3002     │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
-        │                       │                       │
-        ▼                       ▼                       ▼
-   plugins.json           remoteEntry.js          remoteEntry.js
-   Configuration          (SSG + MF)              (Native MF)
-```
+You will see the host application immediately, and after a 5-second countdown, the plugins will be dynamically fetched and injected into the page.
 
-### Key Features
+## How to Develop a Plugin
 
-- **SSR-Safe Module Federation**: PluginSystem handles client-side execution
-- **Bidirectional Components**: Host and plugins share components at runtime
-- **Auto-Injection**: Plugins inject automatically using DOM selectors
-- **TypeScript**: Full type safety across host and plugin systems
-- **Professional Styling**: Extracted CSS classes with shared design system
+Developing a plugin for this system is straightforward. Here's a guide based on the existing `HostDataWidget`.
 
-## Quick Start
+### 1. Create the Plugin Component
 
-```bash
-# Clone and start all services
-git clone <repository>
-cd react-dynamic-bi-directional-module-federation-poc
-./demo.sh
-```
+Create your component in the `plugin_frontend/src/components` directory. This component can import and use anything the host has exposed.
 
-The demo script automatically:
-1. Installs all dependencies
-2. Builds applications
-3. Starts all services (ports 3000, 3001, 3002)
-4. Opens http://localhost:3001 to view the demo
+**Example: `plugin_frontend/src/components/HostDataWidget.tsx`**
 
-## Project Structure
+```tsx
+import React, { useState, useEffect } from 'react';
+import { useRemoteModule } from '../hooks/useRemoteModule';
+import type { QueryClient } from '@tanstack/react-query';
 
-```
-├── demo.sh                   # Complete demo runner
-├── host_backend/             # Configuration API server
-│   ├── server.js            # Express server serving plugins.json
-│   └── plugins.json         # Plugin configuration
-├── host_frontend/            # Next.js SSG application
-│   ├── pages/index.tsx      # Main page with plugin integration
-│   ├── src/
-│   │   ├── components/      # Exportable components
-│   │   │   ├── Header.tsx   # Shared header component
-│   │   │   ├── Sidebar.tsx  # Navigation with injection targets
-│   │   │   └── Card.tsx     # Reusable card component
-│   │   ├── contexts/        # React contexts
-│   │   │   ├── CounterContext.tsx
-│   │   │   └── AuthContext.tsx
-│   │   └── utils/
-│   │       └── PluginSystem.tsx # Plugin loading and injection
-│   └── next.config.js       # Module Federation + SSG config
-└── plugin_frontend/         # Webpack plugin application
-    ├── src/
-    │   └── components/      # Plugin components
-    │       ├── Widget.tsx           # Basic plugin widget
-    │       ├── HostCardWidget.tsx   # Uses host Card component
-    │       ├── HostCounterWidget.tsx # Uses host counter state
-    │       └── HostAuthWidget.tsx   # Uses host auth context
-    └── webpack.config.js    # Module federation configuration
-```
+const HostDataWidget: React.FC = () => {
+  // 1. Import the host's queryClient
+  const { remoteModule: HostLib } = useRemoteModule({
+    remote: 'host_frontend',
+    component: 'queryClient',
+  });
 
-## Plugin Configuration
+  const [message, setMessage] = useState('Waiting for host data...');
 
-```json
-{
-  "plugins": [
-    {
-      "id": "before-first-card",
-      "name": "Basic Widget",
-      "module_name": "Widget",
-      "scope_name": "plugin_frontend",
-      "remote_url": "http://localhost:3002/remoteEntry.js",
-      "injection_config": {
-        "target_selector": "#first-card",
-        "injection_position": "before"
+  useEffect(() => {
+    if (HostLib?.queryClient) {
+      const queryClient: QueryClient = HostLib.queryClient;
+
+      // 2. Read initial data from the host's cache
+      const authData: any = queryClient.getQueryData(['auth', 'status']);
+      if (authData) {
+        setMessage(authData.message);
       }
+
+      // 3. Subscribe to changes for reactivity
+      const unsubscribe = queryClient.getQueryCache().subscribe(event => {
+        if (event.type === 'updated' && event.query.queryKey[0] === 'auth') {
+          setMessage((event.query.state.data as any)?.message);
+        }
+      });
+
+      return () => unsubscribe();
     }
-  ]
-}
+  }, [HostLib]);
+
+  return (
+    <div>
+      <h4>My New Plugin</h4>
+      <p>Message from host: {message}</p>
+    </div>
+  );
+};
+
+export default HostDataWidget;
 ```
 
-### Injection Positions
-- `before` - Insert before target element
-- `after` - Insert after target element
-- `replace` - Replace target element
-- `prepend` - Insert as first child
-- `append` - Insert as last child
+### 2. Expose the Plugin & Configure Sharing
 
-## Module Federation Configuration
+To make your plugin's components available to the host and to enable your plugin to consume components from the host, you must configure the Module Federation plugin in `plugin_frontend/webpack.config.js`.
 
-### Host (Next.js)
+This configuration is the key to bi-directional sharing. Below is a commented example explaining each part:
+
 ```javascript
-// next.config.js
-new NextFederationPlugin({
-  name: 'host_frontend',
-  exposes: {
-    './Header': './src/components/Header',
-    './Card': './src/components/Card',
-    './AuthContext': './src/contexts/AuthContext',
-  },
-  shared: {
-    react: { singleton: true },
-    'react-dom': { singleton: true },
-  },
-})
-```
-
-### Plugin (Webpack)
-```javascript
-// webpack.config.js
+// plugin_frontend/webpack.config.js
 new ModuleFederationPlugin({
+  // A unique name for the plugin remote. This is used by the host to identify it.
   name: 'plugin_frontend',
+
+  // The filename for the remote entry, which is the manifest of the plugin.
+  filename: 'remoteEntry.js',
+
+  // An object where keys are the module names the host will use to import,
+  // and values are the paths to the actual components.
   exposes: {
     './Widget': './src/components/Widget',
+    './HostDataWidget': './src/components/HostDataWidget',
     './HostCardWidget': './src/components/HostCardWidget',
+    './HostCounterWidget': './src/components/HostCounterWidget',
   },
-  remotes: {
-    host_frontend: 'host_frontend@http://localhost:3001/remoteEntry.js',
-  },
+
+  // Defines shared libraries to ensure singletons (e.g., one instance of React).
   shared: {
-    react: { singleton: true },
-    'react-dom': { singleton: true },
+    // For each library, we declare our intent to share.
+    // `singleton: true` ensures that only one instance of this library
+    // is loaded in the entire application (the host's version).
+    // This is critical for libraries like React that have a global state.
+    //
+    // Why does the plugin need this?
+    // 1. To Consume: It tells Webpack "I need React, but please check if the
+    //    host is already providing a singleton version before you bundle my own."
+    // 2. To Provide: It acts as a fallback. If the plugin were run standalone,
+    //    it would use its own copy.
+    react: { singleton: true, eager: true },
+    'react-dom': { singleton: true, eager: true },
+    '@tanstack/react-query': { singleton: true, eager: true },
   },
-})
+}),
 ```
 
-## Testing the Demo
+It is crucial that the host application (`host_frontend/next.config.js`) has a corresponding `shared` configuration to act as the provider for these singleton libraries.
 
-1. **Auto Injection**: Visit http://localhost:3001 and wait for 5-second countdown
-2. **Plugin Loading**: Plugins automatically inject into designated DOM positions
-3. **Bidirectional Federation**: Plugin widgets use host components and contexts
-4. **Error Handling**: Test with invalid plugin URLs for graceful fallbacks
+### 3. Configure the Plugin for Injection
 
-## Production Deployment
+The `plugins.json` tells it where to find plugins and how to load them.
+The host application should expect to find this file relative to its web root, so you need to ensure it is served correctly.
 
-### Host Frontend (SSG)
-```bash
-npm run build    # Generates static files in 'out/'
-# Deploy 'out/' folder to CDN or static hosting
+In the demo, if we build the host app, `public/plugins.json` lands in the web root e.g., `http://localhost:3001/plugins.json`.
+In k8s, you would use a ConfigMap, it allows you to place this file into the web root without building the host application.
+
+```jsonc
+// host_frontend/public/plugins.json
+[
+  {
+    // A unique identifier for this specific plugin instance.
+    "id": "demonstrate-auth-access",
+
+    // The full URL to the remoteEntry.js file of the plugin.
+    "remote_url": "http://localhost:3002/remoteEntry.js",
+
+    // The `name` defined in the plugin's Module Federation configuration.
+    // This acts as the remote's scope.
+    "remote_name": "plugin_frontend",
+
+    // The key from the `exposes` object in the plugin's webpack config.
+    // This is the identifier for the module you want to load.
+    //
+    // So if in the hosts webpack.config.js you have:
+    //   exposes: { './HostDataWidget': ... }
+    "remote_component": "HostDataWidget",
+
+    // Specifies where and how the plugin should be injected into the host DOM.
+    "injection_config": {
+      // A CSS selector for the DOM element where the plugin component will be rendered.
+      "target_selector": "main",
+      // The position where the plugin will be injected relative to the target selector. before|after|replace|prepend|append.
+      "injection_position": "before",
+    }
+  }
+]
 ```
 
-### Plugin Frontend
-```bash
-npm run build    # Generates webpack dist/ with remoteEntry.js
-# Deploy 'dist/' folder to serve remoteEntry.js
+### 4. Styling Your Plugin
+
+Styling with separate CSS files is possible and recommended to keep your plugin's styles isolated from the host application. Here's how to do it:
+
+1.  **Import Styles**: Import your CSS file in a top-level plugin component that is exposed to the host. For example, in `HostDataWidget.tsx`, you would add:
+    ```tsx
+    import '../styles/components.css';
+    ```
+    When the host loads your plugin, Webpack will automatically inject these styles into the document's `<head>`.
+
+2.  **Scope Your Styles**: To prevent CSS conflicts, scope all of your plugin's styles under a parent class. In this POC, we use `.plugin-scope`.
+    ```css
+    /* plugin_frontend/src/styles/components.css */
+    .plugin-scope .my-plugin-button {
+      background-color: blue;
+    }
+    ```
+
+3.  **Apply the Scope**: Use a wrapper component to apply the scoping class to all of your plugin's UI. We have created `PluginWidgetWrapper` for this purpose.
+
+### 5. Restart and Test
+
+Run `./demo.sh` again to rebuild the plugin and restart the servers. Your new widget will now be loaded and injected into the host application.
+
+## Architecture: Demo vs. Production
+
+This proof-of-concept is structured to clearly separate the production-ready plugin system from the demo-specific features. This makes it easy to understand the core logic and adapt it for a real-world application.
+
+### The Core Logic (Production-Ready)
+
+-   **File:** `host_frontend/src/utils/PluginSystemProvider.tsx`
+-   **Component:** `PluginSystemProvider`
+
+This component contains the essential, production-grade logic for the plugin system. Its responsibilities are:
+1.  Fetching the `plugins.json` configuration.
+2.  Dynamically loading the remote plugin files (`remoteEntry.js`).
+3.  Injecting the specified plugin components into the host application's DOM.
+
+It is lean, efficient, and has no knowledge of the demo's countdown timer. To use this system in your own application, you would copy and integrate this provider.
+
+### The Demo Wrapper
+
+-   **File:** `host_frontend/src/utils/PluginSystemDemoProvider.tsx`
+-   **Component:** `PluginSystemDemoProvider`
+
+This component is a wrapper created **exclusively for this demo**. It serves one purpose: to visually demonstrate that the plugins are loaded dynamically at runtime, *after* the main host application is already interactive.
+
+It works by:
+1.  Immediately rendering the host application.
+2.  Displaying a 4-second countdown overlay.
+3.  **Only then**, it uses the real `PluginSystemProvider` to load and inject the plugins.
+
+This delay is purely for demonstration and should **not** be used in a production environment.
+
+### How to Switch to Production Mode
+
+In a real application, you would want plugins to load as quickly as possible. To do this, you would use the `PluginSystemProvider` directly.
+
+Find this code in `host_frontend/pages/_app.tsx`:
+
+```tsx
+// Using the demo provider
+import { PluginSystemDemoProvider } from '../src/utils/PluginSystemDemoProvider';
+
+// ...
+<PluginSystemDemoProvider>
+  <Component {...pageProps} />
+</PluginSystemDemoProvider>
+// ...
 ```
 
-### Configuration
-- Update plugin URLs in `plugins.json` for production
-- Configure CORS headers for cross-origin module federation
-- Implement proper CSP headers for security
+And change it to use the production provider:
 
-## Performance Considerations
+```tsx
+// Using the production provider
+import { PluginSystemProvider } from '../src/utils/PluginSystemProvider';
 
-- **Bundle Optimization**: Shared dependencies prevent duplication
-- **Lazy Loading**: Plugins loaded on-demand with visual feedback
-- **Error Boundaries**: Failed plugins don't crash the host application
-- **Caching**: Static builds enable efficient CDN caching
+// ...
+<PluginSystemProvider>
+  <Component {...pageProps} />
+</PluginSystemProvider>
+// ...
+```
 
-## Use Cases
+## What Can Be Shared?
 
-- **CMS Plugin Systems**: Dynamic content widgets
-- **Dashboard Extensions**: Third-party dashboard widgets
-- **Micro-frontends**: Independent team deployments
-- **White-label Solutions**: Customer-specific customizations
+### ✅ Safe to Share
 
-## Technical Achievements
+- **Components**: The host can expose entire React components for plugins to render. This is the most common and robust pattern.
+- **React Context**: By sharing the React instance, plugins can use hooks like `useContext` to tap directly into the host's state providers (e.g., `CounterContext`).
+- **State Management Instances**: You can directly share instances of libraries like TanStack Query's `QueryClient`. This gives plugins deep, reactive access to the host's data layer.
+- **Plain Functions and Objects**: Any non-hook utility functions or constants can be easily shared.
 
-- **Runtime Module Federation**: No build-time coupling between applications
-- **SSG Compatibility**: Static site generation with dynamic plugin loading
-- **Type Safety**: Full TypeScript support across federated boundaries
-- **Production Ready**: Error handling, loading states, and professional UI
+### ❌ Unsafe to Share
+
+- **Direct Hook Calls**: You should **not** export a custom hook from the host and call it directly in a plugin. While it may seem to work if the React singleton is perfectly configured, it's a fragile pattern that can easily break if there are any mismatches, leading to the "Invalid hook call" error. The safer approach is to share a component that uses the hook, or to share the underlying data source (like the `queryClient`).
+
+This POC demonstrates that a highly decoupled, yet deeply integrated, plugin system is achievable with modern frontend tooling.

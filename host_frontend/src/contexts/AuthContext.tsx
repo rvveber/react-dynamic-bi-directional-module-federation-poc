@@ -1,46 +1,40 @@
-import React, { createContext, useState, useContext, ReactNode } from 'react';
-
-interface User {
-  id: string;
-  name: string;
-  email: string;
-  role: string;
-}
+import React, { createContext, useContext, ReactNode } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { getAuthStatusApi } from '../api/auth';
 
 interface AuthContextType {
-  isAuthenticated: boolean;
-  login: (email: string, password: string) => Promise<boolean>;
+  login: () => void;
   logout: () => void;
-  isLoading: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const queryClient = useQueryClient();
 
-  const login = async (email: string, password: string): Promise<boolean> => {
-    setIsLoading(true);
+  const login = () => {
+    // Simple login - just set a token
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('auth_token', `demo-token-${Date.now()}`);
+    }
     
-    // Simulate API call delay
-    await new Promise(resolve => setTimeout(resolve, 200));
-    
-    // Simple authentication - just set to true
-    setIsAuthenticated(true);
-    setIsLoading(false);
-    return true;
+    // Invalidate the auth query to trigger a refetch
+    queryClient.invalidateQueries({ queryKey: ['auth', 'status'] });
   };
 
   const logout = () => {
-    setIsAuthenticated(false);
+    // Clear auth data
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('auth_token');
+    }
+    
+    // Invalidate the auth query to trigger a refetch
+    queryClient.invalidateQueries({ queryKey: ['auth', 'status'] });
   };
 
   const value: AuthContextType = {
-    isAuthenticated,
     login,
     logout,
-    isLoading
   };
 
   return (
@@ -58,18 +52,16 @@ export const useAuth = () => {
   return context;
 };
 
-// Additional hook that could be used for queries
-export const useAuthQuery = () => {
-  const { isAuthenticated } = useAuth();
-  
-  return {
-    getCurrentUser: () => ({ authenticated: isAuthenticated }),
-    isUserAdmin: () => isAuthenticated, // Simple: authenticated users are considered "admin"
-    getUserPermissions: () => {
-      return isAuthenticated 
-        ? ['read', 'write', 'delete', 'admin'] 
-        : [];
-    },
-    isAuthenticated
-  };
-};
+/**
+ * Simple React Query hook for authentication status.
+ * This can be used by any component in the host application.
+ */
+export function useAuthQuery() {
+  return useQuery({
+    queryKey: ['auth', 'status'],
+    queryFn: getAuthStatusApi,
+    staleTime: 0, // Always fresh for demo purposes
+    refetchOnWindowFocus: false,
+    retry: 1,
+  });
+}

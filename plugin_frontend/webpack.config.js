@@ -1,6 +1,7 @@
 const path = require('path');
 const { ModuleFederationPlugin } = require('@module-federation/enhanced');
 
+
 module.exports = {
   entry: './src/index.js',
   mode: 'production',
@@ -39,16 +40,17 @@ module.exports = {
       filename: 'remoteEntry.js',
       exposes: {
         './Widget': './src/components/Widget',
+        './HostDataWidget': './src/components/HostDataWidget',
         './HostCardWidget': './src/components/HostCardWidget',
         './HostCounterWidget': './src/components/HostCounterWidget',
-        './HostAuthWidget': './src/components/HostAuthWidget',
-      },
-      remotes: {
-        host_frontend: 'host_frontend@http://localhost:3001/remoteEntry.js',
       },
       shared: {
         react: { singleton: true, eager: true },
         'react-dom': { singleton: true, eager: true },
+        '@tanstack/react-query': { singleton: true, eager: true },
+      },
+      remotes: {
+        host_frontend: 'host_frontend@/remoteEntry.js',
       },
     }),
   ],

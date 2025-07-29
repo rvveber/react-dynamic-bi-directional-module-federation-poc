@@ -2,11 +2,9 @@
   "plugins": [
     {
       "id": "before-first-card",
-      "name": "Before First Card Plugin", 
-      "description": "Plugin that injects before the first card",
       "remote_url": "http://localhost:3002/remoteEntry.js",
-      "module_name": "Widget",
-      "scope_name": "plugin_frontend",
+      "remote_name": "plugin_frontend",
+      "remote_component": "Widget",
       "injection_config": {
         "target_selector": "#first-card",
         "injection_position": "before"
@@ -14,11 +12,9 @@
     },
     {
       "id": "replace-middle-card",
-      "name": "Replace Middle Card Plugin",
-      "description": "Plugin that replaces the middle card",
       "remote_url": "http://localhost:3002/remoteEntry.js",
-      "module_name": "Widget", 
-      "scope_name": "plugin_frontend",
+      "remote_name": "plugin_frontend",
+      "remote_component": "Widget", 
       "injection_config": {
         "target_selector": "#middle-card",
         "injection_position": "replace"
@@ -26,11 +22,9 @@
     },
     {
       "id": "after-last-card",
-      "name": "After Last Card Plugin",
-      "description": "Plugin that injects after the last card",
       "remote_url": "http://localhost:3002/remoteEntry.js",
-      "module_name": "Widget",
-      "scope_name": "plugin_frontend",
+      "remote_name": "plugin_frontend",
+      "remote_component": "Widget",
       "injection_config": {
         "target_selector": "#last-card",
         "injection_position": "after"
@@ -38,11 +32,9 @@
     },
     {
       "id": "bidirectional-main",
-      "name": "Bidirectional Main Plugin",
-      "description": "Bidirectional plugin that appends to main content",
       "remote_url": "http://localhost:3002/remoteEntry.js",
-      "module_name": "HostCardWidget", 
-      "scope_name": "plugin_frontend",
+      "remote_name": "plugin_frontend",
+      "remote_component": "HostCardWidget", 
       "injection_config": {
         "target_selector": "main",
         "injection_position": "append"
@@ -50,23 +42,19 @@
     },
     {
       "id": "counter-widget",
-      "name": "Host Counter Widget",
-      "description": "A widget that interacts with a shared counter state from the host.",
       "remote_url": "http://localhost:3002/remoteEntry.js",
-      "module_name": "HostCounterWidget",
-      "scope_name": "plugin_frontend",
+      "remote_name": "plugin_frontend",
+      "remote_component": "HostCounterWidget",
       "injection_config": {
         "target_selector": "main",
         "injection_position": "prepend"
       }
     },
     {
-      "id": "auth-widget",
-      "name": "Host Auth Widget",
-      "description": "A widget that displays the current authentication state from the host.",
+      "id": "data-widget",
       "remote_url": "http://localhost:3002/remoteEntry.js",
-      "module_name": "HostAuthWidget",
-      "scope_name": "plugin_frontend",
+      "remote_name": "plugin_frontend",
+      "remote_component": "HostDataWidget",
       "injection_config": {
         "target_selector": "main",
         "injection_position": "prepend"

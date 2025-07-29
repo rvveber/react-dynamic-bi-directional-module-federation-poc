@@ -17,17 +17,25 @@ const nextConfig = {
       config.plugins.push(
         new NextFederationPlugin({
           name: 'host_frontend',
-          filename: 'remoteEntry.js',
+          filename: 'static/chunks/remoteEntry.js',
           exposes: {
             './Header': './src/components/Header',
             './Sidebar': './src/components/Sidebar',
             './Card': './src/components/Card',
             './CounterContext': './src/contexts/CounterContext',
             './AuthContext': './src/contexts/AuthContext',
+            './queryClient': './src/lib/react-query',
+            './common': './src/components/common',
+          },
+          extraOptions: {
+            exposePages: true,
+            enableImageLoaderFix: true,
+            enableUrlLoaderFix: true,
           },
           shared: {
             react: { singleton: true },
             'react-dom': { singleton: true },
+            '@tanstack/react-query': { singleton: true },
           },
         })
       );

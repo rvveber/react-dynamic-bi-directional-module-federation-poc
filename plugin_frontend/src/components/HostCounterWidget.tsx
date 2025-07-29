@@ -1,6 +1,7 @@
 import React from "react";
 import { useRemoteModule } from "../hooks/useRemoteModule";
-import { PluginWidgetWrapper, LoadingState, ErrorState } from './SharedComponents';
+import { PluginWidgetWrapper } from './common';
+import { LoadingState, ErrorState } from 'host_frontend/common';
 import '../styles/components.css';
 
 const HostCounterWidget: React.FC = () => {
@@ -21,7 +22,7 @@ const HostCounterWidget: React.FC = () => {
 
   return (
     <PluginWidgetWrapper
-      title="Host Counter Widget"
+      title="HostCounterWidget (from Plugin)"
       description="This component interacts with the host's counter state."
     >
       <div className="counter-container">
