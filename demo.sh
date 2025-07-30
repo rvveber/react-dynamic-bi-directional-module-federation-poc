@@ -72,18 +72,6 @@ PLUGIN_PID=$!
 echo $PLUGIN_PID >> "$PID_FILE"
 echo "✅ Plugin frontend started (PID: $PLUGIN_PID)"
 
-# Start configuration backend
-# echo "🔧 Starting configuration backend..."
-# cd "$SCRIPT_DIR/host_backend"
-# if [ ! -d "node_modules" ]; then
-#     echo "Installing backend dependencies..."
-#     npm install
-# fi
-# node server.js &
-# BACKEND_PID=$!
-# echo $BACKEND_PID >> "$PID_FILE"
-# echo "✅ Configuration backend started (PID: $BACKEND_PID)"
-
 echo ""
 echo "🎉 Module Federation Demo Ready!"
 echo "================================"
